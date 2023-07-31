@@ -3,15 +3,15 @@
 // CPU Control Instructions
 void CPU::CCF() {
     // Complement Carry Flag (CCF) - CY=CY xor 1
-    flags->C(!flags->C());
-    flags->N(false);
-    flags->H(false);
+    reg->flagC(!reg->flagC());
+    reg->flagN(false);
+    reg->flagH(false);
 }
 void CPU::SCF() {
     // Set Carry Flag (SCF)
-    flags->C(true);
-    flags->N(false);
-    flags->H(false);
+    reg->flagC(true);
+    reg->flagN(false);
+    reg->flagH(false);
 }
 void CPU::NOP() {
     // No Operation
@@ -66,7 +66,7 @@ void CPU::LD_A_FF00n(uint8_t offset) {
     memory->writeByte(address, reg->A);
 }
 void CPU::LD_FF00n_A(uint8_t offset) {
-    uint16_t address = 0xFF00 + reg->C;
+    uint16_t address = 0xFF00 + offset;
     reg->A = memory->readByte(address);
 }
 void CPU::LD_A_FF00C() {
@@ -124,184 +124,184 @@ void CPU::POP_rf(uint8_t& r, uint8_t& r1) {
 // 8-Bit Arithmetic/Logic Instruction Set
 void CPU::ADD_r(uint8_t& r) {
     uint16_t result = static_cast<uint16_t>(reg->A) + r;
-    flags->setFlagsAddSub(reg->A, r, false, result);
+    reg->setFlagsAddSub(reg->A, r, false, result);
     reg->A = static_cast<uint8_t>(result);
 }
 void CPU::ADD_n(uint8_t n) {
     uint16_t result = static_cast<uint16_t>(reg->A) + n;
-    flags->setFlagsAddSub(reg->A, n, false, result);
+    reg->setFlagsAddSub(reg->A, n, false, result);
     reg->A = static_cast<uint8_t>(result);
 }
 void CPU::ADD_HL() {
     uint8_t value = memory->readByte(reg->HL());
     uint16_t result = static_cast<uint16_t>(reg->A) + value;
-    flags->setFlagsAddSub(reg->A, value, false, result);
+    reg->setFlagsAddSub(reg->A, value, false, result);
     reg->A = static_cast<uint8_t>(result);
 }
 void CPU::ADC_r(uint8_t& r) {
-    uint16_t result = static_cast<uint16_t>(reg->A) + r + (flags->C() ? 1 : 0);
-    flags->setFlagsAddSub(reg->A, r, false, result);
+    uint16_t result = static_cast<uint16_t>(reg->A) + r + (reg->flagC() ? 1 : 0);
+    reg->setFlagsAddSub(reg->A, r, false, result);
     reg->A = static_cast<uint8_t>(result);
 }
 void CPU::ADC_n(uint8_t n) {
-    uint16_t result = static_cast<uint16_t>(reg->A) + n + (flags->C() ? 1 : 0);
-    flags->setFlagsAddSub(reg->A, n, false, result);
+    uint16_t result = static_cast<uint16_t>(reg->A) + n + (reg->flagC() ? 1 : 0);
+    reg->setFlagsAddSub(reg->A, n, false, result);
     reg->A = static_cast<uint8_t>(result);
 }
 void CPU::ADC_HL() {
     uint8_t value = memory->readByte(reg->HL());
-    uint16_t result = static_cast<uint16_t>(reg->A) + value + (flags->C() ? 1 : 0);
-    flags->setFlagsAddSub(reg->A, value, false, result);
+    uint16_t result = static_cast<uint16_t>(reg->A) + value + (reg->flagC() ? 1 : 0);
+    reg->setFlagsAddSub(reg->A, value, false, result);
     reg->A = static_cast<uint8_t>(result);
 }
 void CPU::SUB_r(uint8_t& r) {
     uint16_t result = static_cast<uint16_t>(reg->A) - r;
-    flags->setFlagsAddSub(reg->A, r, true, result);
+    reg->setFlagsAddSub(reg->A, r, true, result);
     reg->A = static_cast<uint8_t>(result);
 }
 void CPU::SUB_n(uint8_t n) {
     uint16_t result = static_cast<uint16_t>(reg->A) - n;
-    flags->setFlagsAddSub(reg->A, n, true, result);
+    reg->setFlagsAddSub(reg->A, n, true, result);
     reg->A = static_cast<uint8_t>(result);
 }
 void CPU::SUB_HL() {
     uint8_t value = memory->readByte(reg->HL());
     uint16_t result = static_cast<uint16_t>(reg->A) - value;
-    flags->setFlagsAddSub(reg->A, value, true, result);
+    reg->setFlagsAddSub(reg->A, value, true, result);
     reg->A = static_cast<uint8_t>(result);
 }
 void CPU::SBC_r(uint8_t& r) {
-    uint16_t result = static_cast<uint16_t>(reg->A) - r - (flags->C() ? 1 : 0);
-    flags->setFlagsAddSub(reg->A, r, true, result);
+    uint16_t result = static_cast<uint16_t>(reg->A) - r - (reg->flagC() ? 1 : 0);
+    reg->setFlagsAddSub(reg->A, r, true, result);
     reg->A = static_cast<uint8_t>(result);
 }
 void CPU::SBC_n(uint8_t n) {
-    uint16_t result = static_cast<uint16_t>(reg->A) - n - (flags->C() ? 1 : 0);
-    flags->setFlagsAddSub(reg->A, n, true, result);
+    uint16_t result = static_cast<uint16_t>(reg->A) - n - (reg->flagC() ? 1 : 0);
+    reg->setFlagsAddSub(reg->A, n, true, result);
     reg->A = static_cast<uint8_t>(result);
 }
 void CPU::SBC_HL() {
     uint8_t value = memory->readByte(reg->HL());
-    uint16_t result = static_cast<uint16_t>(reg->A) - value - (flags->C() ? 1 : 0);
-    flags->setFlagsAddSub(reg->A, value, true, result);
+    uint16_t result = static_cast<uint16_t>(reg->A) - value - (reg->flagC() ? 1 : 0);
+    reg->setFlagsAddSub(reg->A, value, true, result);
     reg->A = static_cast<uint8_t>(result);
 }
 void CPU::AND_r(uint8_t& r) {
     reg->A &= r;
-    flags->setFlagsLogic(reg->A);
+    reg->setFlagsLogic(reg->A);
 }
 void CPU::AND_n(uint8_t n) {
     reg->A &= n;
-    flags->setFlagsLogic(reg->A);
+    reg->setFlagsLogic(reg->A);
 }
 void CPU::AND_HL() {
     uint8_t value = memory->readByte(reg->HL());
     reg->A &= value;
-    flags->setFlagsLogic(reg->A);
+    reg->setFlagsLogic(reg->A);
 }
 void CPU::XOR_r(uint8_t& r) {
     reg->A ^= r;
-    flags->setFlagsLogic(reg->A);
+    reg->setFlagsLogic(reg->A);
 }
 void CPU::XOR_n(uint8_t n) {
     reg->A ^= n;
-    flags->setFlagsLogic(reg->A);
+    reg->setFlagsLogic(reg->A);
 }
 void CPU::XOR_HL() {
     uint8_t value = memory->readByte(reg->HL());
     reg->A ^= value;
-    flags->setFlagsLogic(reg->A);
+    reg->setFlagsLogic(reg->A);
 }
 void CPU::OR_r(uint8_t& r) {
     reg->A |= r;
-    flags->setFlagsLogic(reg->A);
+    reg->setFlagsLogic(reg->A);
 }
 void CPU::OR_n(uint8_t n) {
     reg->A |= n;
-    flags->setFlagsLogic(reg->A);
+    reg->setFlagsLogic(reg->A);
 }
 void CPU::OR_HL() {
     uint8_t value = memory->readByte(reg->HL());
     reg->A |= value;
-    flags->setFlagsLogic(reg->A);
+    reg->setFlagsLogic(reg->A);
 }
 void CPU::CP_r(uint8_t& r) {
-    flags->setFlagsCompare(reg->A, r);
+    reg->setFlagsCompare(reg->A, r);
 }
 void CPU::CP_n(uint8_t n) {
-    flags->setFlagsCompare(reg->A, n);
+    reg->setFlagsCompare(reg->A, n);
 }
 void CPU::CP_HL() {
     uint8_t value = memory->readByte(reg->HL());
-    flags->setFlagsCompare(reg->A, value);
+    reg->setFlagsCompare(reg->A, value);
 }
 void CPU::INC_r(uint8_t& r) {
     r++;
-    flags->setFlagsIncDec(r);
+    reg->setFlagsIncDec(r);
 }
 void CPU::INC_HL() {
     uint8_t value = memory->readByte(reg->HL());
     value++;
     memory->writeByte(reg->HL(), value);
-    flags->setFlagsIncDec(value);
+    reg->setFlagsIncDec(value);
 }
 void CPU::DEC_r(uint8_t& r) {
     r--;
-    flags->setFlagsIncDec(r);
+    reg->setFlagsIncDec(r);
 }
 void CPU::DEC_HL() {
     uint8_t value = memory->readByte(reg->HL());
     value--;
     memory->writeByte(reg->HL(), value);
-    flags->setFlagsIncDec(value);
+    reg->setFlagsIncDec(value);
 }
 void CPU::DAA() {
     uint8_t correction = 0;
     uint8_t lower_HalfWord = reg->A & 0x0F;
 
-    if (flags->H() || (!flags->N() && lower_HalfWord > 9))
+    if (reg->flagH() || (!reg->flagN() && lower_HalfWord > 9))
         correction |= 0x06;
 
-    if (flags->C() || (!flags->N() && reg->A > 0x99)) {
+    if (reg->flagC() || (!reg->flagN() && reg->A > 0x99)) {
         correction |= 0x60;
-        flags->C(true);
+        reg->flagC(true);
     }
 
-    if (flags->N())
+    if (reg->flagN())
         reg->A -= correction;
     else
         reg->A += correction;
 
-    flags->Z(reg->A == 0);
-    flags->H(false);
-    flags->N(false);
+    reg->flagZ(reg->A == 0);
+    reg->flagH(false);
+    reg->flagN(false);
 }
 void CPU::CPL() {
     reg->A = ~reg->A;
-    flags->N(true);
-    flags->H(true);
+    reg->flagN(true);
+    reg->flagH(true);
 }
 
 // 16-Bit Arithmetic/Logic Instruction Set
 void CPU::ADD_HL_rr(uint16_t& rr) {
     uint32_t result = reg->HL() + rr;
-    flags->setFlagsAddSub(reg->HL(), rr, false, result);
+    reg->setFlagsAddSub(reg->HL(), rr, false, result);
     reg->HL(static_cast<uint16_t>(result));
-    flags->H((reg->HL() & 0xFFF) < (rr & 0xFFF));
+    reg->flagH((reg->HL() & 0xFFF) < (rr & 0xFFF));
 }
 //TODO
 void CPU::ADD_HL_rr(uint8_t& r, uint8_t& r1) {
-    uint16_t value = static_cast<uint16_t>((r << 8) | r1);
+    auto value = static_cast<uint16_t>((r << 8) | r1);
     uint16_t result = reg->HL() + value;
-    flags->setFlagsAddSub(reg->HL(), value, false, result);
+    reg->setFlagsAddSub(reg->HL(), value, false, result);
     reg->HL(static_cast<uint16_t>(result));
-    flags->H((reg->HL() & 0xFFF) < (value & 0xFFF));
+    reg->flagH((reg->HL() & 0xFFF) < (value & 0xFFF));
 }
 void CPU::INC_rr(uint16_t& rr) {
     rr++;
 }
 void CPU::INC_rr(uint8_t& r, uint8_t& r1) {
-    uint16_t value = static_cast<uint16_t>((r << 8) | r1);
+    auto value = static_cast<uint16_t>((r << 8) | r1);
     value++;
     r = static_cast<uint8_t>(value >> 8);
     r1 = static_cast<uint8_t>(value & 0xFF);
@@ -310,159 +310,159 @@ void CPU::DEC_rr(uint16_t& rr) {
     rr--;
 }
 void CPU::DEC_rr(uint8_t& r, uint8_t& r1) {
-    uint16_t value = static_cast<uint16_t>((r << 8) | r1);
+    auto value = static_cast<uint16_t>((r << 8) | r1);
     value--;
     r = static_cast<uint8_t>(value >> 8);
     r1 = static_cast<uint8_t>(value & 0xFF);
 }
 void CPU::ADD_SP_dd(int8_t dd) {
     int result = reg->SP + dd;
-    flags->setFlagsAddSub(reg->SP, dd, false, result);
-    flags->C((result & 0xFFFF0000) != 0);
-    flags->H((reg->SP & 0x0F) + (dd & 0x0F) > 0x0F);
+    reg->setFlagsAddSub(reg->SP, dd, false, result);
+    reg->flagC((result & 0xFFFF0000) != 0);
+    reg->flagH((reg->SP & 0x0F) + (dd & 0x0F) > 0x0F);
     reg->SP = static_cast<uint16_t>(result);
 }
 void CPU::LD_HL_SP_dd(int8_t dd) {
     int result = reg->SP + dd;
-    flags->setFlagsAddSub(reg->SP, dd, false, result);
-    flags->C((result & 0xFFFF0000) != 0);
-    flags->H((reg->SP & 0x0F) + (dd & 0x0F) > 0x0F);
+    reg->setFlagsAddSub(reg->SP, dd, false, result);
+    reg->flagC((result & 0xFFFF0000) != 0);
+    reg->flagH((reg->SP & 0x0F) + (dd & 0x0F) > 0x0F);
     reg->SP = static_cast<uint16_t>(result);
 }
 
 //Rotate and Shift instructions
 void CPU::RLCA() {
-    flags->C((reg->A & 0x80) != 0);
+    reg->flagC((reg->A & 0x80) != 0);
     reg->A = (reg->A << 1) | (reg->A >> 7);
-    flags->setFlagsLogic(reg->A);
+    reg->setFlagsLogic(reg->A);
 }
 void CPU::RLA() {
     bool c = reg->C;
-    flags->C((reg->A & 0x80) != 0);
+    reg->flagC((reg->A & 0x80) != 0);
     reg->A = (reg->A << 1) | c;
-    flags->setFlagsLogic(reg->A);
+    reg->setFlagsLogic(reg->A);
 }
 void CPU::RRCA() {
-    flags->C((reg->A & 0x01) != 0);
+    reg->flagC((reg->A & 0x01) != 0);
     reg->A = (reg->A >> 1) | (reg->A << 7);
-    flags->setFlagsLogic(reg->A);
+    reg->setFlagsLogic(reg->A);
 }
 void CPU::RRA() {
     bool c = reg->C;
-    flags->C((reg->A & 0x01) != 0);
+    reg->flagC((reg->A & 0x01) != 0);
     reg->A = (reg->A >> 1) | (c << 7);
-    flags->setFlagsLogic(reg->A);
+    reg->setFlagsLogic(reg->A);
 }
 void CPU::RLC_r(uint8_t& r) {
-    flags->C((r & 0x80) != 0);
+    reg->flagC((r & 0x80) != 0);
     r = (r << 1) | (r >> 7);
-    flags->setFlagsLogic(r);
+    reg->setFlagsLogic(r);
 }
 void CPU::RLC_HL() {
     uint8_t value = memory->readByte(reg->HL());
-    flags->C((value & 0x80) != 0);
+    reg->flagC((value & 0x80) != 0);
     value = (value << 1) | (value >> 7);
-    flags->setFlagsLogic(value);
+    reg->setFlagsLogic(value);
     memory->writeByte(reg->HL(), value);
 }
 void CPU::RL_r(uint8_t& r) {
-    bool c = flags->C();
-    flags->C((r & 0x80) != 0);
+    bool c = reg->flagC();
+    reg->flagC((r & 0x80) != 0);
     r = (r << 1) | c;
-    flags->setFlagsLogic(r);
+    reg->setFlagsLogic(r);
 }
 void CPU::RL_HL() {
-    bool c = flags->C();
+    bool c = reg->flagC();
     uint8_t value = memory->readByte(reg->HL());
-    flags->C((value & 0x80) != 0);
+    reg->flagC((value & 0x80) != 0);
     value = (value << 1) | c;
-    flags->setFlagsLogic(value);
+    reg->setFlagsLogic(value);
     memory->writeByte(reg->HL(), value);
 }
 void CPU::RRC_r(uint8_t& r) {
-    flags->C((r & 0x01) != 0);
+    reg->flagC((r & 0x01) != 0);
     r = (r >> 1) | (r << 7);
-    flags->setFlagsLogic(r);
+    reg->setFlagsLogic(r);
 }
 void CPU::RRC_HL() {
     uint8_t value = memory->readByte(reg->HL());
-    flags->C((value & 0x01) != 0);
+    reg->flagC((value & 0x01) != 0);
     value = (value >> 1) | (value << 7);
-    flags->setFlagsLogic(value);
+    reg->setFlagsLogic(value);
     memory->writeByte(reg->HL(), value);
 }
 void CPU::RR_r(uint8_t& r) {
-    bool c = flags->C();
-    flags->C((r & 0x01) != 0);
+    bool c = reg->flagC();
+    reg->flagC((r & 0x01) != 0);
     r = (r >> 1) | (c << 7);
-    flags->setFlagsLogic(r);
+    reg->setFlagsLogic(r);
 }
 void CPU::RR_HL() {
-    bool c = flags->C();
+    bool c = reg->flagC();
     uint8_t value = memory->readByte(reg->HL());
-    flags->C((value & 0x01) != 0);
+    reg->flagC((value & 0x01) != 0);
     value = (value >> 1) | (c << 7);
-    flags->setFlagsLogic(value);
+    reg->setFlagsLogic(value);
     memory->writeByte(reg->HL(), value);
 }
 void CPU::SLA_r(uint8_t& r) {
-    flags->C((r & 0x80) != 0);
+    reg->flagC((r & 0x80) != 0);
     r = r << 1;
-    flags->setFlagsLogic(r);
+    reg->setFlagsLogic(r);
 }
 void CPU::SLA_HL() {
     uint8_t value = memory->readByte(reg->HL());
-    flags->C((value & 0x80) != 0);
+    reg->flagC((value & 0x80) != 0);
     value = value << 1;
-    flags->setFlagsLogic(value);
+    reg->setFlagsLogic(value);
     memory->writeByte(reg->HL(), value);
 }
 void CPU::SWAP_r(uint8_t& r) {
     r = ((r & 0x0F) << 4) | ((r & 0xF0) >> 4);
-    flags->setFlagsLogic(r);
+    reg->setFlagsLogic(r);
 }
 void CPU::SWAP_HL() {
     uint8_t value = memory->readByte(reg->HL());
     value = ((value & 0x0F) << 4) | ((value & 0xF0) >> 4);
-    flags->setFlagsLogic(value);
+    reg->setFlagsLogic(value);
     memory->writeByte(reg->HL(), value);
 }
 void CPU::SRA_r(uint8_t& r) {
-    flags->C((r & 0x01) != 0);
+    reg->flagC((r & 0x01) != 0);
     r = (r >> 1) | (r & 0x80);
-    flags->setFlagsLogic(r);
+    reg->setFlagsLogic(r);
 }
 void CPU::SRA_HL() {
     uint8_t value = memory->readByte(reg->HL());
-    flags->C(value & 0x01);
+    reg->flagC(value & 0x01);
     value = (value >> 1) | (value & 0x80);
-    flags->setFlagsLogic(value);
+    reg->setFlagsLogic(value);
     memory->writeByte(reg->HL(), value);
 }
 void CPU::SRL_r(uint8_t& r) {
-    flags->C(r & 0x01);
+    reg->flagC(r & 0x01);
     r = r >> 1;
-    flags->setFlagsLogic(r);
+    reg->setFlagsLogic(r);
 }
 void CPU::SRL_HL() {
     uint8_t value = memory->readByte(reg->HL());
-    flags->C(value & 0x01);
+    reg->flagC(value & 0x01);
     value = value >> 1;
-    flags->setFlagsLogic(value);
+    reg->setFlagsLogic(value);
     memory->writeByte(reg->HL(), value);
 }
 
 // Single-Bit Operation Instruction Set
 void CPU::BIT_n_r(uint8_t n, uint8_t& r) {
-    flags->Z((r & (1 << n)) == 0);
-    flags->N(0);
-    flags->H(1);
+    reg->flagZ((r & (1 << n)) == 0);
+    reg->flagN(false);
+    reg->flagH(true);
 }
 void CPU::BIT_n_HL(uint8_t n) {
     uint8_t value = memory->readByte(reg->HL());
-    flags->Z((value & (1 << n)) == 0);
-    flags->N(0);
-    flags->H(1);
+    reg->flagZ((value & (1 << n)) == 0);
+    reg->flagN(false);
+    reg->flagH(true);
 }
 void CPU::SET_n_r(uint8_t n, uint8_t& r) {
     r |= (1 << n);
@@ -490,15 +490,15 @@ void CPU::JP_HL() {
 }
 void CPU::JP_f_nn(uint8_t f, uint16_t nn) {
     // TODO
-    if (1)
+    if (true)
         reg->PC = nn;
 }
 void CPU::JR_PC_dd(uint8_t dd) {
     reg->PC += dd;
 }
-void CPU::JR_f_PC_dd(uint8_t f, int8_t dd) {
+void CPU::JR_f_PC_dd(uint8_t f, uint8_t dd) {
     // TODO
-    if (1) {
+    if (true) {
         reg->PC += dd;
     }
 }
@@ -509,7 +509,7 @@ void CPU::CALL_nn(uint16_t nn) {
 }
 void CPU::CALL_f_nn(uint8_t f, uint16_t nn) {
     // TODO
-    if (1) {
+    if (true) {
         reg->SP -= 2;
         memory->writeWord(reg->SP, reg->PC);
         reg->PC = nn;
@@ -521,7 +521,7 @@ void CPU::RET() {
 }
 void CPU::RET_f(uint8_t f) {
     // TODO
-    if (1) {
+    if (true) {
         reg->PC = reg->SP;
         reg->SP += 2;
     }

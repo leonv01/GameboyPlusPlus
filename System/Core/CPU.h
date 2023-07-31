@@ -1,16 +1,11 @@
-//
-// Created by leonv on 31/07/2023.
-//
-
 #ifndef GAMEBOYPLUS_CPU_H
 #define GAMEBOYPLUS_CPU_H
 
-
-#include <cstdint>
 #include <sstream>
 #include <iostream>
 
 #include "Memory.h"
+#include "Register.h"
 
 class CPU
 {
@@ -18,164 +13,7 @@ private:
     const int CLOCK_SPEED = 4194304;
     std::unique_ptr<Memory> memory;	 //Main Memory
 
-    bool interrupt_master;
-
-    struct Register {
-        uint8_t A;		//Accumulator
-        uint8_t B, C;	//General-Purpose Register
-        uint8_t D, E;	//General-Purpose Register
-        uint8_t H, L;	//General-Purpose Register
-
-        uint16_t SP;	//Stackpointer
-        uint16_t PC;	//Program Counter
-
-        uint16_t BC() const {
-            return static_cast<uint16_t>((B << 8) | C);
-        }
-        void BC(uint16_t value) {
-            B = static_cast<uint8_t>(value >> 8);
-            C = static_cast<uint8_t>(value);
-        }
-
-        uint16_t DE() const {
-            return static_cast<uint16_t>((D << 8) | E);
-        }
-        void DE(uint16_t value) {
-            D = static_cast<uint8_t>(value >> 8);
-            E = static_cast<uint8_t>(value);
-        }
-
-        uint16_t HL() const {
-            return static_cast<uint16_t>((H << 8) | L);
-        }
-        void HL(uint16_t value) {
-            H = static_cast<uint8_t>(value >> 8);
-            L = static_cast<uint8_t>(value);
-        }
-
-        std::string toString() const {
-            std::ostringstream oss;
-            oss << "\nRegister:\n"
-                << "A: " << static_cast<int>(A) << ' '
-                << "B: " << static_cast<int>(B) << ' '
-                << "C: " << static_cast<int>(C) << ' '
-                << "D: " << static_cast<int>(D) << ' '
-                << "E: " << static_cast<int>(E) << ' '
-                << "H: " << static_cast<int>(H) << ' '
-                << "L: " << static_cast<int>(L) << ' '
-                << "BC: " << static_cast<int>(BC()) << ' '
-                << "DE: " << static_cast<int>(DE()) << ' '
-                << "HL: " << static_cast<int>(HL()) << ' '
-                << "SP: " << static_cast<int>(SP) << ' '
-                << "PC: " << static_cast<int>(PC) << '\n';
-            return oss.str();
-        }
-
-        Register() : SP(0xFFFE), PC(0x0100){
-            A = B = C = D = E = H = L = 0;
-        }
-        ~Register() = default;
-    };
-
-    struct Flags {
-    private:
-        const uint8_t FLAG_Z = 0x80;
-        const uint8_t FLAG_N = 0x40;
-        const uint8_t FLAG_H = 0x20;
-        const uint8_t FLAG_C = 0x10;
-
-
-    public:
-        uint8_t F;
-
-        bool Z() const {
-            return (F & FLAG_Z);
-        }
-        void Z(bool value) {
-            if (value)
-                F |= FLAG_Z;
-            else
-                F &= ~FLAG_Z;
-        }
-
-        bool N() const {
-            return (F & FLAG_N);
-        }
-        void N(bool value) {
-            if (value)
-                F |= FLAG_N;
-            else
-                F &= ~FLAG_N;
-        }
-
-        bool H() const {
-            return (F & FLAG_H);
-        }
-        void H(bool value) {
-            if (value)
-                F |= FLAG_H;
-            else
-                F &= ~FLAG_H;
-        }
-
-        bool C() const {
-
-            return (F & FLAG_C);
-        }
-        void C(bool value) {
-            if (value)
-                F |= FLAG_C;
-            else
-                F &= ~FLAG_C;
-        }
-
-        std::string toString() const {
-            std::ostringstream oss;
-            oss << "Flags:\n"
-                << "Z: " << static_cast<int>(Z()) << ' '
-                << "N: " << static_cast<int>(N()) << ' '
-                << "H: " << static_cast<int>(H()) << ' '
-                << "C: " << static_cast<int>(C()) << '\n';
-            return oss.str();
-        }
-
-        // Helper function to set flags for ADD, ADC, SUB, and SBC operations
-        void setFlagsAddSub(uint8_t a, uint8_t b, bool isSubtraction, uint16_t result) {
-            Z((result & 0xFF) == 0);
-            N(isSubtraction);
-            H((((a & 0x0F) + (isSubtraction ? (~b) : b) & 0x0F) > 0x0F));
-            C((result & 0x100) != 0);
-        }
-
-        // Helper function to set flags for logical operations (AND, OR, XOR)
-        void setFlagsLogic(uint8_t result) {
-            Z(result == 0);
-            N(0);
-            H(1);
-            C(0);
-        }
-
-        // Helper function to set flags for compare (CP) operation
-        void setFlagsCompare(uint8_t a, uint8_t b) {
-            uint16_t result = static_cast<uint8_t>(a) - b;
-            Z((result & 0xFF) == 0);
-            N(true);
-            H((a & 0x0F) < (b & 0x0F));
-            C(a < b);
-        }
-
-        // Helper function to set flags for increment and decrement operations
-        void setFlagsIncDec(uint8_t value) {
-            Z(value == 0);
-            N(false);
-            H((value & 0x0F) == 0);
-        }
-
-        ~Flags() = default;
-        Flags() {
-            F = 0x00;
-        }
-    };
+    bool interrupt_master{};
 
     struct Interrupt {
         //Interrupt Flags (IF) Register
@@ -194,13 +32,15 @@ private:
         void disableInterrupt(uint8_t value) { interrupt_enable_register &= ~value; }
     };
 
-    std::unique_ptr<Flags> flags;
+   // std::unique_ptr<Flags> flags;
     std::unique_ptr<Register> reg;
     std::unique_ptr<Interrupt> interrupt;
 
 public:
     CPU();
     ~CPU();
+
+    int cycle{};
 
     void init();
 
@@ -226,15 +66,15 @@ public:
     void writeWord(uint16_t address, uint16_t value);
     uint16_t readWord(uint16_t address);
 
-    void fetchOpCode(uint8_t& cycle);
-    uint8_t parseOpCode(uint8_t opcode);
-    uint8_t prefixOpCode(uint8_t opcode);
+    void fetchOpCode();
+    void parseOpCode(uint8_t opcode);
+    void prefixOpCode(uint8_t opcode);
 
     void printStatus();
 
     // 8-Bit Load Instruction Set
-    void LD_r_r(uint8_t& r, uint8_t& r2);	// LD r, r2 (Load reference 8-bit value (r2) into register (r))
-    void LD_r_n(uint8_t& r, uint8_t n);	// LD r, n (Load immediate 8-bit value (n) into register (r))
+    static void LD_r_r(uint8_t& r, uint8_t& r2);	// LD r, r2 (Load reference 8-bit value (r2) into register (r))
+    static void LD_r_n(uint8_t& r, uint8_t n);	// LD r, n (Load immediate 8-bit value (n) into register (r))
     void LD_r_HL(uint8_t& r);	// LD r, HL (Load value from memory location specified by HL register pair into register (r))
     void LD_HL_r(uint8_t& r);	// LD r (Load value from register (r) into memory location specified by HL register pair)
     void LD_HL_n(uint8_t n);	// LD HL, n (Load immediate 8-bit value (n) into memory location specified by HL register pair)
@@ -250,8 +90,8 @@ public:
     void LD_A_HL_DEC();
 
     // 16-Bit Load Instruction Set
-    void LD_rr_nn(uint16_t& rr, uint16_t nn);	// LD rr, nn (Load 16-bit register with immediate 16-bit value)
-    void LD_rr_nn(uint8_t& r, uint8_t& r1, uint16_t nn);
+    static void LD_rr_nn(uint16_t& rr, uint16_t nn);	// LD rr, nn (Load 16-bit register with immediate 16-bit value)
+    static void LD_rr_nn(uint8_t& r, uint8_t& r1, uint16_t nn);
     void LD_nn_SP(uint16_t nn);	// LD (nn), SP (Store Stack Pointer to Memory)
     void LD_SP_HL();	// LD SP, HL (Load Stack Pointer from HL)
     void PUSH_rr(uint16_t rr);	// PUSH rr (Push 16-bit register onto the Stack)
@@ -286,7 +126,7 @@ public:
     void INC_r(uint8_t& r);	// INC r (Increment register)
     void INC_HL();	// INC (HL) (Increment value at memory address HL)
     void DEC_r(uint8_t& r);	// DEC r (Decrement register)
-    void DEC_rr(uint8_t& r, uint8_t& r1);
+    static void DEC_rr(uint8_t& r, uint8_t& r1);
     void DEC_HL();	// DEC (HL) (Decrement value at memory address HL)
     void DAA();	// DAA (Decimal adjust accumulator)
     void CPL();	// CPL (Complement accumulator)
@@ -294,9 +134,9 @@ public:
     // 16-Bit Arithmetic/Logic Instruction Set
     void ADD_HL_rr(uint16_t& rr);	// ADD HL, rr (Add register pair rr to HL)
     void ADD_HL_rr(uint8_t& r, uint8_t& r1);
-    void INC_rr(uint16_t& rr);	// INC rr (Increment register pair rr)
-    void INC_rr(uint8_t& r, uint8_t& r1);
-    void DEC_rr(uint16_t& rr);	// DEC rr (Decrement register pair rr)
+    static void INC_rr(uint16_t& rr);	// INC rr (Increment register pair rr)
+    static void INC_rr(uint8_t& r, uint8_t& r1);
+    static void DEC_rr(uint16_t& rr);	// DEC rr (Decrement register pair rr)
     void ADD_SP_dd(int8_t dd);	// ADD SP, dd (Add 8-bit signed number dd to SP)
     void LD_HL_SP_dd(int8_t dd);	// LD HL, SP+dd (Load HL with SP plus 8-bit signed number dd)
 
@@ -325,9 +165,9 @@ public:
     // Single-Bit Operation Instruction Set
     void BIT_n_r(uint8_t n, uint8_t& r);	// BIT n, r (Test bit n in register r)
     void BIT_n_HL(uint8_t n);	// BIT n, (HL) (Test bit n in memory at address HL)
-    void SET_n_r(uint8_t n, uint8_t& r);	// SET n, r (Set bit n in register r)
+    static void SET_n_r(uint8_t n, uint8_t& r);	// SET n, r (Set bit n in register r)
     void SET_n_HL(uint8_t n);	// SET n, (HL) (Set bit n in memory at address HL)
-    void RES_n_r(uint8_t n, uint8_t& r);	// RES n, r (Reset bit n in register r)
+    static void RES_n_r(uint8_t n, uint8_t& r);	// RES n, r (Reset bit n in register r)
     void RES_n_HL(uint8_t n);	// RES n, (HL) (Reset bit n in memory at address HL)
 
     // CPU Control Instructions
@@ -344,7 +184,7 @@ public:
     void JP_HL();	// JP HL (Jump to the address held in the HL register)
     void JP_f_nn(uint8_t f, uint16_t nn);	// JP f, nn (Conditional jump to 16-bit immediate address nn based on flag f)
     void JR_PC_dd(uint8_t dd);	// JR PC+dd (Relative jump to PC+8-bit signed displacement dd)
-    void JR_f_PC_dd(uint8_t f, int8_t dd);	// JR f, PC+dd (Conditional relative jump to PC+8-bit signed displacement dd based on flag f)
+    void JR_f_PC_dd(uint8_t f, uint8_t dd);	// JR f, PC+dd (Conditional relative jump to PC+8-bit signed displacement dd based on flag f)
     void CALL_nn(uint16_t nn);	// CALL nn (Call subroutine at 16-bit immediate address nn)
     void CALL_f_nn(uint8_t f, uint16_t nn);	// CALL f, nn (Conditional call to subroutine at 16-bit immediate address nn based on flag f)
     void RET();	// RET (Return from subroutine)

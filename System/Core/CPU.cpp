@@ -8,12 +8,10 @@ CPU::CPU() {
     init();
 }
 
-CPU::~CPU() {
-}
+CPU::~CPU() = default;
 
 void CPU::init() {
     reg = std::make_unique<Register>();
-    flags = std::make_unique<Flags>();
     memory = std::make_unique<Memory>(&reg->SP);
     interrupt = std::make_unique<Interrupt>();
 }
@@ -103,12 +101,12 @@ uint16_t CPU::readWord(uint16_t address) {
     return memory->readWord(address);
 }
 
-void CPU::fetchOpCode(uint8_t& cycle) {
+void CPU::fetchOpCode() {
     uint8_t opcode = memory->readByte(reg->PC);
     reg->PC++;
-    cycle = parseOpCode(opcode);
+    parseOpCode(opcode);
 }
 
 void CPU::printStatus() {
-    std::cout << reg->toString() << flags->toString() << std::endl;
+    std::cout << reg->toString() << std::endl;
 }

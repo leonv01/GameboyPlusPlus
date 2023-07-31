@@ -17,15 +17,12 @@ void Emulator::start() {
     cpu->init();
 
     while (1) {
-        int8_t currentCycle = 0;
-
-        uint8_t cycle;
+        int currentCycle = 0;
 
         while (currentCycle < CYCLES_PER_FRAME) {
             std::cout << static_cast<int>(currentCycle) << std::endl;
-            cpu->fetchOpCode(cycle);
-            currentCycle += cycle;
-            cycle = 0;
+            cpu->fetchOpCode();
+            currentCycle += cpu->cycle;
             cpu->handleInterrupts();
         }
     }
@@ -59,19 +56,19 @@ void Emulator::debug() {
     std::cout << "Cycle: " << static_cast<int>(cycle) << "\t Remaining Cycles: " << static_cast<int>(cyclesRemaining) << std::endl;
 
     // Execute instructions
-    cpu->fetchOpCode(cycle);
+    cpu->fetchOpCode();
     cpu->printStatus();
 
     cyclesRemaining -= cycle;
     std::cout << "Cycle: " << static_cast<int>(cycle) << "\t Remaining Cycles: " << static_cast<int>(cyclesRemaining) << std::endl;
 
-    cpu->fetchOpCode(cycle);
+    cpu->fetchOpCode();
     cpu->printStatus();
 
     cyclesRemaining -= cycle;
     std::cout << "Cycle: " << static_cast<int>(cycle) << "\t Remaining Cycles: " << static_cast<int>(cyclesRemaining) << std::endl;
 
-    cpu->fetchOpCode(cycle);
+    cpu->fetchOpCode();
     cpu->printStatus();
 
     cyclesRemaining -= cycle;
