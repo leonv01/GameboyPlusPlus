@@ -1,10 +1,8 @@
-#include <iostream>
 #include "Emulator/Emulator.h"
 
-int main() {
+int main(){
     Emulator* emulator = new Emulator();
 
     emulator->debug();
-
     return 0;
 }
