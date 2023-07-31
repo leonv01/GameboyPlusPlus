@@ -1,5 +1,5 @@
 #include <iostream>
-#include "Emulator.h"
+#include "Emulator/Emulator.h"
 
 int main() {
     Emulator* emulator = new Emulator();

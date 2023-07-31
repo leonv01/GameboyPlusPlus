@@ -5,7 +5,7 @@
 #ifndef GAMEBOYPLUS_EMULATOR_H
 #define GAMEBOYPLUS_EMULATOR_H
 
-#include "CPU.h"
+#include "../Core/CPU.h"
 #include <iostream>
 
 class Emulator
