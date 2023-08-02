@@ -28,6 +28,9 @@ public:
     uint16_t SP;	//Stackpointer
     uint16_t PC;	//Program Counter
 
+    [[nodiscard]] uint16_t AF() const;
+    void AF(uint16_t value);
+
     [[nodiscard]] uint16_t BC() const;
     void BC(uint16_t value);
 
@@ -62,6 +65,8 @@ public:
 
     // Helper function to set flags for increment and decrement operations
     void setFlagsIncDec(uint8_t value);
+
+    void init();
 
     Register();
     ~Register() = default;

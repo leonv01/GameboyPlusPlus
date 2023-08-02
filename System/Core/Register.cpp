@@ -8,6 +8,14 @@ Register::Register() : SP(0xFFFE), PC(0x0100){
     A = F = B = C = D = E = H = L = 0;
 }
 
+uint16_t Register::AF() const{
+    return static_cast<uint16_t>((A << 8) | F);
+}
+void Register::AF(uint16_t value){
+    A = static_cast<uint8_t>(value >> 8);
+    F = static_cast<uint8_t>(value);
+}
+
 uint16_t Register::BC() const{
     return static_cast<uint16_t>((B << 8) | C);
 }
@@ -122,4 +130,13 @@ void Register::setFlagsIncDec(uint8_t value) {
     flagZ(value == 0);
     flagN(false);
     flagH((value & 0x0F) == 0);
+}
+
+void Register::init() {
+    PC = 0x100;
+    AF(0x01B0);
+    BC(0x0013);
+    DE(0x00D8);
+    HL(0x014D);
+    SP = 0xFFFE;
 }

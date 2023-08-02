@@ -14,6 +14,9 @@ void CPU::init() {
     reg = std::make_unique<Register>();
     memory = std::make_unique<Memory>(&reg->SP);
     interrupt = std::make_unique<Interrupt>();
+
+    reg->init();
+    memory->init();
 }
 
 void CPU::handleInterrupts() {
