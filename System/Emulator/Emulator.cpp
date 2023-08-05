@@ -5,18 +5,22 @@
 #include "Emulator.h"
 
 Emulator::Emulator() {
-    cyclesRemaining = CYCLES_PER_FRAME;
     cpu = new CPU();
+    ppu = new PPU((cpu->memory->getVram()));
+    ppu->loadVRAM();
+    ppu->debugView();
+    //this->start();
 }
 
 Emulator::~Emulator() {
+    delete ppu;
     delete cpu;
 }
 
 void Emulator::start() {
-    cpu->init();
+    cpu->initCPU();
 
-    while (1) {
+    while (true) {
         int currentCycle = 0;
 
         while (currentCycle < CYCLES_PER_FRAME) {
@@ -24,6 +28,8 @@ void Emulator::start() {
             cpu->fetchOpCode();
             currentCycle += cpu->cycle;
             cpu->handleInterrupts();
+         //   cpu->printStatus();
+            //ppu->debug();
         }
     }
 }
@@ -79,7 +85,7 @@ void Emulator::debug() {
     std::cout << "Result: " << value << std::endl;
 }
 
-void Emulator::init() {
+void Emulator::initEmulator() {
 
 }
 
