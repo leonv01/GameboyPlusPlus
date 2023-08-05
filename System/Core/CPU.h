@@ -4,14 +4,13 @@
 #include <sstream>
 #include <iostream>
 
-#include "Memory.h"
 #include "Register.h"
+#include "Memory.h"
 
 class CPU
 {
 private:
     const int CLOCK_SPEED = 4194304;
-    std::unique_ptr<Memory> memory;	 //Main Memory
 
     bool interrupt_master{};
 
@@ -37,12 +36,14 @@ private:
     std::unique_ptr<Interrupt> interrupt;
 
 public:
-    CPU();
+    std::shared_ptr<Memory> memory;	 //Main Memory
+
+    explicit CPU();
     ~CPU();
 
     int cycle{};
 
-    void init();
+    void initCPU();
 
     void handleInterrupts();
 

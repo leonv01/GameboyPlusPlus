@@ -5,18 +5,18 @@
 #include "CPU.h"
 
 CPU::CPU() {
-    init();
+    reg = std::make_unique<Register>();
+    memory = std::make_unique<Memory>(&reg->SP);
+    initCPU();
 }
 
 CPU::~CPU() = default;
 
-void CPU::init() {
+void CPU::initCPU() {
     reg = std::make_unique<Register>();
-    memory = std::make_unique<Memory>(&reg->SP);
     interrupt = std::make_unique<Interrupt>();
-
+    memory->initMemory();
     reg->init();
-    memory->init();
 }
 
 void CPU::handleInterrupts() {
@@ -106,6 +106,7 @@ uint16_t CPU::readWord(uint16_t address) {
 
 void CPU::fetchOpCode() {
     uint8_t opcode = memory->readByte(reg->PC);
+    std::cout << static_cast<int>(opcode) << std::endl;
     reg->PC++;
     parseOpCode(opcode);
 }
