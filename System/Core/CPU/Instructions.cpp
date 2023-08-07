@@ -488,17 +488,17 @@ void CPU::JP_nn(uint16_t nn) {
 void CPU::JP_HL() {
     reg->PC = reg->HL();
 }
-void CPU::JP_f_nn(uint8_t f, uint16_t nn) {
+void CPU::JP_f_nn(bool f, uint16_t nn) {
     // TODO
-    if (true)
+    if (f)
         reg->PC = nn;
 }
 void CPU::JR_PC_dd(uint8_t dd) {
     reg->PC += dd;
 }
-void CPU::JR_f_PC_dd(uint8_t f, uint8_t dd) {
+void CPU::JR_f_PC_dd(bool f, uint8_t dd) {
     // TODO
-    if (true) {
+    if (f) {
         reg->PC += dd;
     }
 }
@@ -507,9 +507,8 @@ void CPU::CALL_nn(uint16_t nn) {
     memory->writeWord(reg->SP, reg->PC);
     reg->PC = nn;
 }
-void CPU::CALL_f_nn(uint8_t f, uint16_t nn) {
-    // TODO
-    if (true) {
+void CPU::CALL_f_nn(bool f, uint16_t nn) {
+    if (f) {
         reg->SP -= 2;
         memory->writeWord(reg->SP, reg->PC);
         reg->PC = nn;
@@ -519,9 +518,8 @@ void CPU::RET() {
     reg->PC = reg->SP;
     reg->SP += 2;
 }
-void CPU::RET_f(uint8_t f) {
-    // TODO
-    if (true) {
+void CPU::RET_f(bool f) {
+    if (f) {
         reg->PC = reg->SP;
         reg->SP += 2;
     }
