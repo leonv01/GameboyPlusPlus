@@ -3,7 +3,7 @@
 #include <memory>
 #include <iostream>
 
-#include "Cartridge.h"
+#include "../Cartridge.h"
 
 class Memory
 {
