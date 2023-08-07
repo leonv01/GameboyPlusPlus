@@ -692,7 +692,7 @@ void CPU::parseOpCode(uint8_t opcode) {
             cycle = 12;
             word = memory->readWord(reg->PC);
             reg->PC++;
-            LD_HL_SP_dd(word);
+            LD_HL_SP_dd(static_cast<int8_t>(word));
             break;
         case 0xF9:
             cycle = 8;
@@ -917,7 +917,7 @@ void CPU::parseOpCode(uint8_t opcode) {
             cycle = 16;
             word = memory->readWord(reg->PC);
             reg->PC++;
-            ADD_SP_dd(word);
+            ADD_SP_dd(static_cast<int8_t>(word));
             break;
 
             //SHIFT
@@ -938,7 +938,7 @@ void CPU::parseOpCode(uint8_t opcode) {
             RRA();
             break;
 
-        default: std::cout << opcode << std::endl; break;
+        default: std::cout << static_cast<int>(opcode) << std::endl; break;
     }
     reg->PC++;
 }
