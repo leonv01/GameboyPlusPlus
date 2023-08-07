@@ -43,23 +43,23 @@ void Register::HL(uint16_t value) {
 std::string Register::toString() const {
     std::ostringstream oss;
     oss << "\nRegister:\n"
-        << "A: " << static_cast<int>(A) << ' '
-        << "B: " << static_cast<int>(B) << ' '
-        << "C: " << static_cast<int>(C) << ' '
-        << "D: " << static_cast<int>(D) << ' '
-        << "E: " << static_cast<int>(E) << ' '
-        << "H: " << static_cast<int>(H) << ' '
-        << "L: " << static_cast<int>(L) << ' '
-        << "BC: " << static_cast<int>(BC()) << ' '
-        << "DE: " << static_cast<int>(DE()) << ' '
-        << "HL: " << static_cast<int>(HL()) << ' '
-        << "SP: " << static_cast<int>(SP) << ' '
-        << "PC: " << static_cast<int>(PC) << '\n'
+        << "A: " << std::hex << static_cast<int>(A) << ' '
+        << "B: " << std::hex << static_cast<int>(B) << ' '
+        << "C: " <<std::hex <<  static_cast<int>(C) << ' '
+        << "D: "  << std::hex << static_cast<int>(D) << ' '
+        << "E: " << std::hex << static_cast<int>(E) << ' '
+        << "H: " << std::hex << static_cast<int>(H) << ' '
+        << "L: " << std::hex << static_cast<int>(L) << ' '
+        << "BC: " << std::hex << static_cast<int>(BC()) << ' '
+        << "DE: " << std::hex << static_cast<int>(DE()) << ' '
+        << "HL: " << std::hex << static_cast<int>(HL()) << ' '
+        << "SP: " << std::hex << static_cast<int>(SP) << ' '
+        << "PC: " << std::hex << static_cast<int>(PC) << '\n'
         << "Flags:\n"
-        << "Z: " << static_cast<int>(flagZ()) << ' '
-        << "N: " << static_cast<int>(flagN()) << ' '
-        << "H: " << static_cast<int>(flagH()) << ' '
-        << "C: " << static_cast<int>(flagC()) << '\n';
+        << "Z: " << std::hex <<static_cast<int>(flagZ()) << ' '
+        << "N: " << std::hex <<static_cast<int>(flagN()) << ' '
+        << "H: " << std::hex <<static_cast<int>(flagH()) << ' '
+        << "C: " << std::hex <<static_cast<int>(flagC()) << '\n';
     return oss.str();
 }
 
