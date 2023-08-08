@@ -8,11 +8,14 @@ public:
     uint8_t* rom;
     uint8_t* ram;
 
-    int romBanks;
-    int ramBanks;
+    int romBankID;
+    int ramBankID;
+
+    int romBankCount;
+    int ramBankCount;
 
     MBC(uint8_t* rom);
-    MBC(uint8_t* rom, uint8_t* ram, int romBanks, int ramBanks);
+    MBC(uint8_t* rom, uint8_t* ram);
 
     ~MBC();
 
@@ -26,13 +29,15 @@ public:
 class MBC0 : public MBC{
 public:
     uint8_t readByte(uint16_t address) override;
-    uint16_t readWord(uint16_t address) override;
+    void writeByte(uint16_t address, uint8_t value) override;
 };
 
 class MBC1: public MBC{
 public:
     bool ramEnabled;
+    bool ramAccess;
     bool mode;
+
     uint8_t readByte(uint16_t address) override;
     void writeByte(uint16_t address, uint8_t value) override;
 };
