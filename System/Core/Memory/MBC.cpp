@@ -4,17 +4,13 @@
 
 #include "MBC.h"
 
-MBC::MBC(uint8_t *rom) { this->rom = rom; }
+#include <utility>
 
-MBC::MBC(uint8_t *rom, uint8_t *ram) {
-    this->rom = rom;
-    this->ram = ram;
+void MBC::init(std::vector<uint8_t> cartridgeRom, size_t ramSize){
+    rom = std::move(cartridgeRom);
+    ram = std::vector<uint8_t>(ramSize);
 }
 
-MBC::~MBC() {
-    delete rom;
-    delete ram;
-}
 uint8_t MBC0::readByte(uint16_t address) {
     if (address < 0x8000) return rom[address];
     else if(address >= 0xA000 && address <= 0xBFFF) return ram[address - 0xA000];
@@ -26,7 +22,15 @@ void MBC0::writeByte(uint16_t address, uint8_t value) {
 }
 
 uint8_t MBC1::readByte(uint16_t address) {
+    /*
+     * Reading from ROM Bank 0
+     * Read only
+     */
     if(address < 0x4000) return rom[address];
+    /*
+     * Reading from ROM-Banks 0x01 - 0x1F
+     * Read only
+     */
     else if(address < 0x8000){
         uint16_t bankNumber;
         if(romBankID == 0) bankNumber = 0x01;
@@ -35,15 +39,18 @@ uint8_t MBC1::readByte(uint16_t address) {
         uint16_t romAddress = (bankNumber - 1) * 0x4000 + (address - 0x4000);
         return rom[romAddress];
     }
+    /*
+     * Reading from RAM-Banks 0x00 - 0x03
+     * Read/Write
+     */
     else if(address >= 0xA000 && address <= 0xBFFF){
         if(ramEnabled){
             uint16_t ramBankNumber = ramBankID & 0x03;
             uint16_t ramAddress = ramBankNumber * 0x2000 + (address - 0xA000);
-
             return ram[ramAddress];
         }
-        else return 0xFF;
     }
+    return 0xFF;
 }
 
 void MBC1::writeByte(uint16_t address, uint8_t value) {
@@ -68,6 +75,14 @@ void MBC1::writeByte(uint16_t address, uint8_t value) {
         romBankID = (romBankID & 0xE0) | bankID;
 
         //TODO
+        switch(romBankID){
+            case 0x00:
+            case 0x20:
+            case 0x40:
+            case 0x60:
+                romBankID++;
+                break;
+        }
     }
     else if(address < 0x6000){
         uint8_t bankID = value & 0x03;
@@ -98,11 +113,47 @@ void MBC1::writeByte(uint16_t address, uint8_t value) {
 }
 
 uint8_t MBC2::readByte(uint16_t address) {
-    return MBC1::readByte(address);
+    /*
+     * Reading from ROM Bank 0
+     * Read only
+     */
+    if(address < 0x4000) return rom[address];
+    /*
+     * Reading from ROM-Banks 0x01 - 0x0F
+     * Read only
+     */
+    else if(address < 0x8000){
+        uint16_t bankNumber;
+        if(romBankID == 0) bankNumber = 0x01;
+        else bankNumber = romBankID;
+
+        uint16_t romAddress = (bankNumber - 1) * 0x4000 + (address - 0x4000);
+        return rom[romAddress];
+    }
+    else if(address >= 0xA000 && address <= 0xC000){
+        if(ramEnabled){
+            uint16_t ramAddress = ramBankID * 0x2000 + address - 0xA000;
+            return ram[ramAddress];
+        }
+    }
+    return 0x00;
 }
 
 void MBC2::writeByte(uint16_t address, uint8_t value) {
-    MBC1::writeByte(address, value);
+    if(address < 0x2000){
+        if(!(address & 0x0100))
+            ramEnabled = value == 0x0A;
+    }
+    else if(address < 0x4000){
+        if((address & 0x0100))
+            romBankID = value;
+    }
+    else if(address >= 0xA000 && address < 0xC000){
+        if(ramEnabled) {
+            int ramAddress = ramBankID * 0x2000 + address - 0xA000;
+            ram[ramAddress] = value;
+        }
+    }
 }
 
 uint8_t MBC3::readByte(uint16_t address) {
