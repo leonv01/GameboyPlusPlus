@@ -48,6 +48,8 @@ public:
 
     void initMemory();
 
+    void resetMemory();
+
     [[nodiscard]] uint8_t readByte(uint16_t address) const;
     void writeByte(uint16_t address, uint8_t value);
     [[nodiscard]] uint16_t readWord(uint16_t address) const;

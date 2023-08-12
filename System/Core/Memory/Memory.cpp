@@ -25,7 +25,7 @@ bool inline inRange(uint16_t address, uint16_t lowerBound, uint16_t upperBound) 
 
 uint8_t Memory::readByte(uint16_t address) const {
     if (inRange(address, 0x0000, 0x7FFF)) {
-       // std::cout << "Accessing ROM" << std::endl;
+        std::cout << "Reading ROM" << std::endl;
         return cartridge->readByte(address);
     }
     else if (inRange(address, 0x8000, 0x9FFF)) return vram[address - 0x8000];
@@ -41,7 +41,10 @@ uint8_t Memory::readByte(uint16_t address) const {
 }
 
 void Memory::writeByte(uint16_t address, uint8_t value) {
-    if (inRange(address, 0x0000, 0x7FFF)) {}//cartridge->readByte(address); //= value;
+    if (inRange(address, 0x0000, 0x7FFF)) {
+        std::cout << "Writing ROM" << std::endl;
+        cartridge->writeByte(address, value);
+    }
     else if (inRange(address, 0x8000, 0x9FFF)) {
         std::cout << "Accessing VRAM" << std::endl;
         vram[address - 0x8000] = value;
@@ -168,12 +171,23 @@ void Memory::pushWord(uint16_t value) {
 }
 
 void Memory::initMemory() {
-   /* for(size_t i = 0x0104; i <= 0x0133; i++){
-        vram[i - 0x0104] = readByte(i);
-        std::cout << std::hex << static_cast<int>(readByte(i)) << std::endl;
 
-    }
-    */
+}
+
+void Memory::resetMemory() {
+    std::fill(vram.begin(), vram.end(), 0);
+    std::fill(externalRam.begin(), externalRam.end(), 0);
+    std::fill(wramBank0.begin(), wramBank0.end(),0);
+    std::fill(wramBank1.begin(), wramBank0.end(),0);
+    std::fill(echo.begin(), echo.end(),0);
+    std::fill(oam.begin(), oam.end(),0);
+    std::fill(ram.begin(), ram.end(),0);
+    std::fill(hram.begin(), hram.end(),0);
+    std::fill(io.begin(), io.end(),0);
+
+    interrupt = 0;
+    *SP = 0;
+
 }
 
 
