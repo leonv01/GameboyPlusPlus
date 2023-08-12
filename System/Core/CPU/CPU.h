@@ -15,65 +15,68 @@ private:
     std::unique_ptr<Register> reg;
 
 public:
+    /*
+     * Interrupt constants
+     */
     const uint8_t VBLANK = 0x01;
     const uint8_t LCDSTAT = 0x01;
     const uint8_t TIMER = 0x01;
     const uint8_t SERIAL = 0x01;
     const uint8_t JOYPAD = 0x01;
+
     uint8_t interrupt;
-    uint8_t interruptEnableRegister, interruptRequestRegister;
+    uint8_t interruptEnableRegister{};
+    uint8_t interruptRequestRegister{};
+
+    /*
+     * Timer
+     */
+    uint16_t timerCounter{};
+    uint16_t timerFrequency{};
+    void updateTimer(int currentCycle);
+
+    /*
+     * Divider
+     */
+    uint16_t dividerFrequency{};
+    uint16_t dividerCounter{};
+    void updateDivider(int currentCycles);
+
+    int cycle{};
 
     std::shared_ptr<Memory> memory;     //Main Memory
 
     explicit CPU();
-
     ~CPU();
 
-    int cycle{};
-
     void initCPU();
-
-    void fetchOpCode();
-
+    uint8_t fetchOpCode();
     void parseOpCode(uint8_t opcode);
-
     void prefixOpCode(uint8_t opcode);
 
     void printStatus();
 
     void enableInterrupt(uint8_t value);
-
     void disableInterrupt(uint8_t value);
-
     uint8_t enabledInterrupts();
+    void handleInterrupt();
 
 
     // 8-Bit Load Instruction Set
     static void LD_r_r(uint8_t &r, uint8_t &r2);    // LD r, r2 (Load reference 8-bit value (r2) into register (r))
     static void LD_r_n(uint8_t &r, uint8_t n);    // LD r, n (Load immediate 8-bit value (n) into register (r))
-    void
-    LD_r_HL(uint8_t &r);    // LD r, HL (Load value from memory location specified by HL register pair into register (r))
-    void
-    LD_HL_r(uint8_t &r);    // LD r (Load value from register (r) into memory location specified by HL register pair)
-    void
-    LD_HL_n(uint8_t n);    // LD HL, n (Load immediate 8-bit value (n) into memory location specified by HL register pair)
-    void
-    LD_A_nn(uint16_t nn);    // LD A, n (Load 8-bit value from memory location specified by 16-bit immediate value (nn) into Accumulator (A))
-    void
-    LD_nn_A(uint16_t nn);    // LD nn, A (Load value of Accumulator (A) into memory location specified by 16-bit immediate value (nn))
-    void LD_A_FF00n(
-            uint8_t offset);    // LD A, FF00n (Load 8-bit value from I/O port at address 0xFF00 + offset (n) into Accumulator (A))
-    void LD_FF00n_A(
-            uint8_t offset);    // LD FF00n, A (Load value of Accumulator (A) into I/O port at address 0xFF00 + offset (n))
-    void
-    LD_A_FF00C();    // LD A, FF00C (Load 8-bit value from I/O port at address 0xFF00 + register C into Accumulator (A))
+    void LD_r_HL(uint8_t &r);    // LD r, HL (Load value from memory location specified by HL register pair into register (r))
+    void LD_HL_r(uint8_t &r);    // LD r (Load value from register (r) into memory location specified by HL register pair)
+    void LD_HL_n(uint8_t n);    // LD HL, n (Load immediate 8-bit value (n) into memory location specified by HL register pair)
+    void LD_A_nn(uint16_t nn);    // LD A, n (Load 8-bit value from memory location specified by 16-bit immediate value (nn) into Accumulator (A))
+    void LD_nn_A(uint16_t nn);    // LD nn, A (Load value of Accumulator (A) into memory location specified by 16-bit immediate value (nn))
+    void LD_A_FF00n(uint8_t offset);    // LD A, FF00n (Load 8-bit value from I/O port at address 0xFF00 + offset (n) into Accumulator (A))
+    void LD_FF00n_A(uint8_t offset);    // LD FF00n, A (Load value of Accumulator (A) into I/O port at address 0xFF00 + offset (n))
+    void LD_A_FF00C();    // LD A, FF00C (Load 8-bit value from I/O port at address 0xFF00 + register C into Accumulator (A))
     void LD_FF00C_A();    // LD FF00C, A (Load value of Accumulator (A) into I/O port at address 0xFF00 + register C)
     void LD_HL_A_INC();
-
     void LD_HL_A_DEC();
-
     void LD_A_HL_INC();
-
     void LD_A_HL_DEC();
 
     // 16-Bit Load Instruction Set
