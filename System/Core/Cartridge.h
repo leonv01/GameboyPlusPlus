@@ -11,14 +11,17 @@
 #include <string>
 #include <fstream>
 #include <iostream>
+#include "Memory/MBC.h"
 
 class Cartridge {
 private:
-
     const int ROM_SIZE = 0x2000;
     const int TITLE_LENGTH = 0xF;
-    char licenseCode{};
-    char* rom;
+
+    MBC* mbc;
+
+    uint8_t licenseCode{};
+    std::vector<uint8_t> rom;
     int RAM_SIZE{};
 
     char* title;          //0x0134 - 0x0143
@@ -35,7 +38,8 @@ private:
     uint8_t headerChecksum{}; //0x014D
     uint8_t globalChecksum{}; //0x014E - 0x014F
 
-    std::string path = "/home/leon/Documents/GameboyPlusPlus/GameROM/Tetris.gb";
+    std::string cartridgeTypeString{};
+    std::string path = "/home/leon/Documents/GameboyPlusPlus/GameROM/SuperRC.gb";
 public:
 
     Cartridge();
@@ -43,15 +47,18 @@ public:
 
     void loadROM();
 
+    void printCartridgeInfo();
+
     [[nodiscard]] uint8_t readByte(uint16_t address) const;
     [[nodiscard]] uint16_t readWord(uint16_t address) const;
 
-
     std::string getTitle();
-    [[nodiscard]] std::string getCartridgeType() const;
+    void getCartridgeType();
     [[nodiscard]] std::string getRomSize() const;
     [[nodiscard]] std::string getRamSize() const;
     uint8_t getHeaderChecksum();
+
+    void writeByte(uint16_t address, uint8_t value);
 };
 
 

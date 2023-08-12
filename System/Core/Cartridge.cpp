@@ -5,23 +5,25 @@
 #include "Cartridge.h"
 
 Cartridge::Cartridge() {
-    rom = new char[ROM_SIZE];
+    mbc = nullptr;
     title = new char[0xF];
     loadROM();
 }
 
-Cartridge::~Cartridge() {
-    delete rom;
-}
+Cartridge::~Cartridge() = default;
 
 uint16_t Cartridge::readWord(uint16_t address) const {
-    uint8_t highByte = rom[address+ 1];
-    uint8_t lowByte = rom[address ];
+    uint8_t highByte = mbc->readByte(address + 1);
+    uint8_t lowByte = mbc->readByte(address);
     return static_cast<uint16_t>((highByte << 8) | lowByte);
 }
 
 uint8_t Cartridge::readByte(uint16_t address) const {
-    return rom[address];
+    return mbc->readByte(address);
+}
+
+void Cartridge::writeByte(uint16_t address, uint8_t value){
+    mbc->writeByte(address, value);
 }
 
 void Cartridge::loadROM() {
@@ -30,7 +32,14 @@ void Cartridge::loadROM() {
         std::cerr << "Error opening file" << std::endl;
     }
     else{
-        romFile.read(rom, ROM_SIZE);
+        romFile.seekg(0, std::ios::end);
+        std::streampos fileSize = romFile.tellg();
+        romFile.seekg(0, std::ios::beg);
+
+        rom = std::vector<uint8_t>(fileSize);
+        romFile.read(reinterpret_cast<char*>(rom.data()), fileSize);
+
+        if(!romFile) std::cerr << "Failed to read file" << std::endl;
         romFile.close();
 
         licenseCode = rom[0x0145];
@@ -44,26 +53,19 @@ void Cartridge::loadROM() {
         maskRom = rom[0x014C];
         headerChecksum = rom[0x014D];
 
-        std::cout << static_cast<unsigned int>(licenseCode) << std::endl;
-        std::cout << static_cast<unsigned int>(romSize) << std::endl;
-        std::cout
-        << "Title: " << getTitle() << std::endl
-        << "New Licensee: " << "0x" << std::hex << static_cast<int>(newLicensee) << " " << static_cast<int>(newLicensee) << std::endl
-        << "Old Licensee: " << "0x" << std::hex << static_cast<int>(oldLicensee) << " " << static_cast<int>(oldLicensee) << std::endl
-        << "Cartridge Type: " << getCartridgeType() << std::endl
-        << "ROM Size: " << "0x" << std::hex << static_cast<int>(romSize) << " " << static_cast<int>(romSize) << " | " << getRomSize() << std::endl
-        << "RAM Size: " << "0x" << std::hex << static_cast<int>(ramSize) << " " << static_cast<int>(ramSize) << " | " << getRamSize() << std::endl
-        << "Destination Code: " << std::hex << static_cast<int>(destinationCode) << std::endl
-        << "Mask ROM Version Number: " << std::hex << static_cast<int>(maskRom) << std::endl
-        << "Header Checksum: " << std::hex << static_cast<int>(headerChecksum) << " | " << std::hex << static_cast<int>(getHeaderChecksum()) << std::endl
-        ;
-        //for(size_t i = 0; i < ROM_SIZE; i++) std::cout << static_cast<unsigned int>(rom[i]) << " ";
+        getCartridgeType();
+
+        mbc->init(rom, ramSize);
+
+        std::cout << static_cast<int>(mbc->readByte(0x0020)) << " " << static_cast<int>(rom[0x0020]) << std::endl;
+
+        printCartridgeInfo();
     }
 }
 
 std::string Cartridge::getTitle() {
     for(size_t i = 0x134; i <= 0x0143; i++) {
-        title [i - 0x134] = rom[i];
+        title [i - 0x134] = static_cast<char>(rom[i]);
     }
     return title;
 }
@@ -123,19 +125,25 @@ std::string Cartridge::getRomSize() const {
     return output;
 }
 
-std::string Cartridge::getCartridgeType() const {
+void Cartridge::getCartridgeType() {
     std::string output;
     switch(cartridgeType){
         case 0x00:
-            output = "ROM ONLY"; break;
+            output = "ROM ONLY";
+            mbc = new MBC0();
+            break;
         case 0x01:
-            output = "MBC1"; break;
+            output = "MBC1";
+            mbc = new MBC1();
+            break;
         case 0x02:
             output = "MBC1+RAM"; break;
         case 0x03:
             output = "MBC1+RAM+BATTERY"; break;
         case 0x05:
-            output = "MBC2"; break;
+            output = "MBC2";
+            mbc = new MBC2();
+            break;
         case 0x06:
             output = "MBC2+BATTERY"; break;
         case 0x08:
@@ -153,7 +161,9 @@ std::string Cartridge::getCartridgeType() const {
         case 0x10:
             output = "MBC3+TIMER+RAM+BATTERY"; break;
         case 0x11:
-            output = "MBC3"; break;
+            output = "MBC3";
+            mbc = new MBC3();
+            break;
         case 0x12:
             output = "MBC3+RAM"; break;
         case 0x13:
@@ -185,6 +195,23 @@ std::string Cartridge::getCartridgeType() const {
         default:
             output = "ERROR"; break;
     }
-    return output;
+    cartridgeTypeString = output;
+}
+
+void Cartridge::printCartridgeInfo() {
+    std::cout << static_cast<unsigned int>(licenseCode) << std::endl;
+    std::cout << static_cast<unsigned int>(romSize) << std::endl;
+    std::cout
+            << "Title: " << getTitle() << std::endl
+            << "New Licensee: " << "0x" << std::hex << static_cast<int>(newLicensee) << " " << static_cast<int>(newLicensee) << std::endl
+            << "Old Licensee: " << "0x" << std::hex << static_cast<int>(oldLicensee) << " " << static_cast<int>(oldLicensee) << std::endl
+            << "Cartridge Type: " << cartridgeTypeString << std::endl
+            << "ROM Size: " << "0x" << std::hex << static_cast<int>(romSize) << " " << static_cast<int>(romSize) << " | " << getRomSize() << std::endl
+            << "RAM Size: " << "0x" << std::hex << static_cast<int>(ramSize) << " " << static_cast<int>(ramSize) << " | " << getRamSize() << std::endl
+            << "Destination Code: " << std::hex << static_cast<int>(destinationCode) << std::endl
+            << "SGB Flag: " << std::hex << static_cast<int>(sgbFlag) << std::endl
+            << "Mask ROM Version Number: " << std::hex << static_cast<int>(maskRom) << std::endl
+            << "Header Checksum: " << std::hex << static_cast<int>(headerChecksum) << " | " << std::hex << static_cast<int>(getHeaderChecksum()) << std::endl
+            ;
 }
 
