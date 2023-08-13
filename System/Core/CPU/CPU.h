@@ -9,8 +9,19 @@
 
 class CPU {
 private:
+    /*
+     * Timer Addresses
+     */
+    const uint16_t TAC  = 0xFF07;   // Timer Control
+    const uint16_t TMA  = 0xFF06;   // Timer Modulo
+    const uint16_t TIMA = 0xFF05;   // Timer Counter
+    const uint16_t DIV  = 0xFF04;   // Divider Register
+
+    const uint16_t IF   = 0xFF0F;   // Interrupt Flag
+    const uint16_t IE   = 0xFFFF;   // Interrupt Enable
+
     const int CLOCK_SPEED = 4194304;
-    bool interrupt_master{};
+    bool interruptMaster{};
 
     std::unique_ptr<Register> reg;
 
@@ -18,19 +29,22 @@ public:
     /*
      * Interrupt constants
      */
-    const uint8_t VBLANK = 0x01;
-    const uint8_t LCDSTAT = 0x01;
-    const uint8_t TIMER = 0x01;
-    const uint8_t SERIAL = 0x01;
-    const uint8_t JOYPAD = 0x01;
+    constexpr static uint8_t IF_VBLANK     = 0x01;
+    constexpr static uint8_t IF_LCDSTAT    = 0x02;
+    constexpr static uint8_t IF_TIMER      = 0x04;
+    constexpr static uint8_t IF_SERIAL     = 0x08;
+    constexpr static uint8_t IF_JOYPAD     = 0x10;
 
-    uint8_t interrupt;
     uint8_t interruptEnableRegister{};
     uint8_t interruptRequestRegister{};
+    void handleInterrupt();
+    void requestInterrupt(uint8_t value);
+    void interruptServiceRoutine(uint8_t value);
 
     /*
      * Timer
      */
+    uint8_t timerModulo{};
     uint16_t timerCounter{};
     uint16_t timerFrequency{};
     void updateTimer(int currentCycle);
@@ -55,12 +69,6 @@ public:
     void prefixOpCode(uint8_t opcode);
 
     void printStatus();
-
-    void enableInterrupt(uint8_t value);
-    void disableInterrupt(uint8_t value);
-    uint8_t enabledInterrupts();
-    void handleInterrupt();
-
 
     // 8-Bit Load Instruction Set
     static void LD_r_r(uint8_t &r, uint8_t &r2);    // LD r, r2 (Load reference 8-bit value (r2) into register (r))

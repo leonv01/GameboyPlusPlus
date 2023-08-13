@@ -24,52 +24,99 @@ void CPU::printStatus() {
     std::cout << reg->toString() << std::endl;
 }
 
-void CPU::handleInterrupt() {
-
-}
-
 void CPU::updateTimer(int currentCycle) {
-    uint8_t tac = memory->readByte(0xFF07);
+    uint8_t tac = memory->readByte(TAC);
     /*
-     * Check if Timer is enabled with Bit 2
+     * If Bit 2 is set, timer is enabled
      */
-    if (tac & 0x04) {
-        int freq{};
-        /*
-         * Determine clock frequency based on Bit 0 and 1
-         */
-        switch (tac & 0x3) {
-            case 0x00:
-                freq = 1024;
-                break;
-            case 0x01:
-                freq = 16;
-                break;
-            case 0x02:
-                freq = 64;
-                break;
-            case 0x03:
-                freq = 256;
-                break;
-        }
+    if(tac & 0x04){
+        uint8_t value = memory->readByte(TIMA);
+        timerCounter -= currentCycle;
 
-        uint8_t timerEnabled = memory->readByte(0xFF07);
-        if (timerEnabled & 0x2) {
-            if (true) {
-                uint8_t timerVal = memory->readByte(0xFF05);
+        if(timerCounter <= 0) {
+            switch (tac & 0x03) {
+                case 0x00:
+                    timerFrequency = 1024;
+                    break;
+                case 0x01:
+                    timerFrequency = 16;
+                    break;
+                case 0x02:
+                    timerFrequency = 64;
+                    break;
+                case 0x03:
+                    timerFrequency = 256;
+                    break;
+            }
 
-                if (false) {
-                    uint8_t temp = memory->readByte(0xFF06);
-                    memory->writeByte(0xFF05, temp);
-                } else {
-                    memory->writeByte(0xFF05, timerVal + 1);
-                }
+            if(value == 255){
+                uint8_t tma = memory->readByte(TMA);
+                memory->writeByte(TIMA, tma);
+                requestInterrupt(IF_TIMER);
+            }
+            else{
+                memory->writeByte(TIMA, value + 1);
             }
         }
     }
-
 }
+
+
 
 void CPU::updateDivider(int currentCycles) {
 
+}
+
+/*
+ * Interrupt Request is written into Interrupt Flag address in Main Memory
+ */
+void CPU::requestInterrupt(uint8_t value) {
+    uint8_t interrupt = memory->readByte(IF);
+    interrupt |= value;
+    memory->writeByte(IF, interrupt);
+}
+
+/*
+ * Interrupt Execution is handled at Interrupt Enable address in Main Memory
+ */
+void CPU::handleInterrupt() {
+    if(interruptMaster){
+        uint8_t interrupt = memory->readByte(IF);
+
+        // VBANK has the highest priority
+        if(interrupt & IF_VBLANK){
+            interruptServiceRoutine(IF_VBLANK);
+            interrupt &= ~IF_VBLANK;
+        }
+        else if(interrupt & IF_LCDSTAT){
+            interruptServiceRoutine(IF_LCDSTAT);
+            interrupt &= ~IF_LCDSTAT;
+        }
+        else if(interrupt & IF_TIMER){
+            interruptServiceRoutine(IF_TIMER);
+            interrupt &= ~IF_TIMER;
+        }
+        else if(interrupt & IF_SERIAL){
+            interruptServiceRoutine(IF_SERIAL);
+            interrupt &= ~IF_SERIAL;
+        }
+        else if(interrupt & IF_JOYPAD){
+            interruptServiceRoutine(IF_JOYPAD);
+            interrupt &= ~IF_JOYPAD;
+        }
+    }
+}
+
+void CPU::interruptServiceRoutine(uint8_t value) {
+    interruptMaster = false;
+    memory->pushWord(reg->PC);
+
+    switch(value){
+        case IF_VBLANK:     reg->PC = 0x40; break;
+        case IF_LCDSTAT:    reg->PC = 0x48; break;
+        case IF_TIMER:      reg->PC = 0x50; break;
+        case IF_SERIAL:     reg->PC = 0x58; break;
+        case IF_JOYPAD:     reg->PC = 0x60; break;
+        default:                            break;
+    }
 }
