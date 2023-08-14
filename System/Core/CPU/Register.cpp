@@ -139,4 +139,5 @@ void Register::init() {
     DE(0x00D8);
     HL(0x014D);
     SP = 0xFFFE;
+    PC = 0x0100;
 }
