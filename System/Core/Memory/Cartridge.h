@@ -11,7 +11,7 @@
 #include <string>
 #include <fstream>
 #include <iostream>
-#include "Memory/MBC.h"
+#include "MBC.h"
 
 class Cartridge {
 private:
@@ -39,10 +39,10 @@ private:
     uint8_t globalChecksum{}; //0x014E - 0x014F
 
     std::string cartridgeTypeString{};
-    std::string path = "/home/leon/Documents/GameboyPlusPlus/GameROM/SuperRC.gb";
+    std::string path;
 public:
 
-    Cartridge();
+    Cartridge(std::string path);
     ~Cartridge();
 
     void loadROM();

@@ -4,7 +4,8 @@
 
 #include "Cartridge.h"
 
-Cartridge::Cartridge() {
+Cartridge::Cartridge(std::string path) {
+    this->path = path;
     mbc = nullptr;
     title = new char[0xF];
     loadROM();
