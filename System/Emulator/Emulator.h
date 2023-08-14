@@ -3,6 +3,7 @@
 
 #include "../Core/CPU/CPU.h"
 #include "../Core/PPU/PPU.h"
+#include "../Core/Joypad/Joypad.h"
 
 #include <ctime>
 
@@ -13,9 +14,10 @@ private:
 
     const float cyclesPerFrame = static_cast<float>(CLOCKSPEED) / static_cast<float>(FPS);
 
-    CPU* cpu;
-    PPU* ppu;
-    clock_t* timer;
+    std::unique_ptr<CPU> cpu;
+    std::unique_ptr<PPU> ppu;
+    std::unique_ptr<Joypad> joypad;
+    std::unique_ptr<clock_t>* timer;
 
 public:
     Emulator();

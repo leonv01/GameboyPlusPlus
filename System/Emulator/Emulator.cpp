@@ -5,20 +5,14 @@
 #include "Emulator.h"
 
 Emulator::Emulator() {
-    cpu = new CPU();
-    ppu = new PPU();
+    cpu = std::make_unique<CPU>();
+    ppu = std::make_unique<PPU>();;
     timer = nullptr;
 }
 
-Emulator::~Emulator() {
-    delete timer;
-    delete ppu;
-    delete cpu;
-
-}
+Emulator::~Emulator() = default;
 
 void Emulator::start() {
-    timer = new clock_t;
 
     while(true){
         int currentCycle{};
