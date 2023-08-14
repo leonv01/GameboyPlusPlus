@@ -64,7 +64,12 @@ void CPU::updateTimer(int currentCycle) {
 
 
 void CPU::updateDivider(int currentCycles) {
-
+    dividerCounter += currentCycles;
+    if(dividerCounter > 0xFF){
+        dividerCounter = 0;
+        uint8_t divValue = memory->readByte(DIV);
+        memory->writeByte(DIV, divValue + 1);
+    }
 }
 
 /*
