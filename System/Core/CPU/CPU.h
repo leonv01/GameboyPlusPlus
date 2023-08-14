@@ -35,8 +35,6 @@ public:
     constexpr static uint8_t IF_SERIAL     = 0x08;
     constexpr static uint8_t IF_JOYPAD     = 0x10;
 
-    uint8_t interruptEnableRegister{};
-    uint8_t interruptRequestRegister{};
     void handleInterrupt();
     void requestInterrupt(uint8_t value);
     void interruptServiceRoutine(uint8_t value);

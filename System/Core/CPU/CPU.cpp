@@ -10,10 +10,10 @@ CPU::CPU() {
 CPU::~CPU() = default;
 
 void CPU::initCPU() {
-    reg = std::make_unique<Register>();
-    //interrupt = std::make_unique<Interrupt>();
-    memory->initMemory();
-    reg->init();
+    memory->initMemory();       // initializes main memory
+    reg->init();                // initializes registers and PC/SP
+    interruptMaster = false;    // disables interrupt master
+
 }
 
 uint8_t CPU::fetchOpCode() {
@@ -61,8 +61,6 @@ void CPU::updateTimer(int currentCycle) {
     }
 }
 
-
-
 void CPU::updateDivider(int currentCycles) {
     dividerCounter += currentCycles;
     if(dividerCounter > 0xFF){
@@ -93,19 +91,19 @@ void CPU::handleInterrupt() {
             interruptServiceRoutine(IF_VBLANK);
             interrupt &= ~IF_VBLANK;
         }
-        else if(interrupt & IF_LCDSTAT){
+        if(interrupt & IF_LCDSTAT){
             interruptServiceRoutine(IF_LCDSTAT);
             interrupt &= ~IF_LCDSTAT;
         }
-        else if(interrupt & IF_TIMER){
+        if(interrupt & IF_TIMER){
             interruptServiceRoutine(IF_TIMER);
             interrupt &= ~IF_TIMER;
         }
-        else if(interrupt & IF_SERIAL){
+        if(interrupt & IF_SERIAL){
             interruptServiceRoutine(IF_SERIAL);
             interrupt &= ~IF_SERIAL;
         }
-        else if(interrupt & IF_JOYPAD){
+        if(interrupt & IF_JOYPAD){
             interruptServiceRoutine(IF_JOYPAD);
             interrupt &= ~IF_JOYPAD;
         }
