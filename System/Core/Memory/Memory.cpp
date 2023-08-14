@@ -3,7 +3,7 @@
 Memory::Memory(uint16_t *address) {
     SP = std::make_unique<uint16_t>(*address);
 
-    cartridge = std::make_unique<Cartridge>();
+    cartridge = nullptr;
 
     vram = std::vector<uint8_t>(VRAM_SIZE, 0);
     externalRam = std::vector<uint8_t>(RAM_SIZE, 0);
@@ -171,7 +171,12 @@ void Memory::pushWord(uint16_t value) {
 }
 
 void Memory::initMemory() {
-
+    writeByte(0xFF0F, 0x00);    // resets Interrupt Flag (IF) register
+    writeByte(0xFFFF, 0x00);    // resets Interrupt Enable (IE) register
+    writeByte(0xFF04, 0x00);    // resets Divider Register
+    writeByte(0xFF05, 0x00);    // resets Timer Counter
+    writeByte(0xFF06, 0x00);    // resets Timer Modulo
+    writeByte(0xFF07, 0x00);    // resets Timer control
 }
 
 void Memory::resetMemory() {
@@ -188,6 +193,10 @@ void Memory::resetMemory() {
     interrupt = 0;
     *SP = 0;
 
+}
+
+void Memory::loadROM(std::string path) {
+    cartridge = std::make_unique<Cartridge>(path);
 }
 
 

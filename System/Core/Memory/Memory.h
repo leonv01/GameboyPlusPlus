@@ -3,7 +3,7 @@
 #include <memory>
 #include <iostream>
 
-#include "../Cartridge.h"
+#include "Cartridge.h"
 
 class Memory
 {
@@ -47,7 +47,7 @@ public:
     std::vector<uint8_t>* getVram();
 
     void initMemory();
-
+    void loadROM(std::string path);
     void resetMemory();
 
     [[nodiscard]] uint8_t readByte(uint16_t address) const;
