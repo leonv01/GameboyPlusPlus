@@ -4,9 +4,11 @@
 
 #include "Emulator.h"
 
+#include <utility>
+
 Emulator::Emulator() {
     cpu = std::make_unique<CPU>();
-    ppu = std::make_unique<PPU>();;
+    ppu = std::make_unique<PPU>();
     timer = nullptr;
 }
 
@@ -32,4 +34,8 @@ void Emulator::start() {
             cpu->cycle = 0;
         }
     }
+}
+
+void Emulator::loadROM(std::string path) {
+    cpu->memory->loadROM(std::move(path));
 }

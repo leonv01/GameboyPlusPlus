@@ -19,11 +19,13 @@ private:
     std::unique_ptr<Joypad> joypad;
     std::unique_ptr<clock_t>* timer;
 
+
 public:
     Emulator();
     ~Emulator();
 
     void start();
+    void loadROM(std::string path);
 };
 
 
