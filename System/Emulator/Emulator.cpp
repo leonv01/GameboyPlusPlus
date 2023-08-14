@@ -16,33 +16,39 @@ Emulator::Emulator() {
 Emulator::~Emulator() = default;
 
 void Emulator::start() {
-    int targetFramDuration = 16;
-    while(true){
+    /*
+     * Equation:    1000ms / 60 FPS ~= 16.67 ms
+     * Sets the limit for the time per frame
+     */
+    int targetFrameDuration = 16;
+    while (true) {
         auto start = std::chrono::high_resolution_clock::now();
         int currentCycle{};
         cpu->handleInterrupt();
 
-        while(currentCycle < cyclesPerFrame){
+        while (currentCycle < cyclesPerFrame) {
             uint8_t opcode = cpu->fetchOpCode();
-         //   std::cout << std::hex << static_cast<int>(opcode) << std::endl;
+            // std::cout << std::hex << static_cast<int>(opcode) << std::endl;
             cpu->parseOpCode(opcode);
             currentCycle += cpu->cycle;
-
             ppu->updatePPU();
             cpu->updateTimer(currentCycle);
-
-
-
             cpu->cycle = 0;
         }
 
         auto end = std::chrono::high_resolution_clock::now();
         auto duration = std::chrono::duration_cast<std::chrono::milliseconds>(end - start);
 
-        int remainingTime = targetFramDuration - duration.count();
+        int remainingTime = targetFrameDuration - duration.count();
 
-        if(remainingTime > 0){
-            std::this_thread::sleep_for(std::chrono::milliseconds (remainingTime));
+        if (remainingTime > 0) {
+            /*
+             * If time remains, the program sleeps for the time difference
+             * e.g.: Target Frames = 16ms; Current Frame = 12ms
+             * Remaining time = 16ms - 12ms = 4ms
+             * The program thread would need to sleep for 4 ms to keep the time sync up
+             */
+            std::this_thread::sleep_for(std::chrono::milliseconds(remainingTime));
         }
     }
 }
