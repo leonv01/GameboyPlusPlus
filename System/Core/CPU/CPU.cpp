@@ -4,7 +4,7 @@ CPU::CPU() {
     reg = std::make_unique<Register>();
     memory = std::make_unique<Memory>(&reg->SP);
     initCPU();
-    //memory->initMemory();
+    memory->initMemory();
 }
 
 CPU::~CPU() = default;
