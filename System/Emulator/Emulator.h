@@ -5,7 +5,7 @@
 #include "../Core/PPU/PPU.h"
 #include "../Core/Joypad/Joypad.h"
 
-#include <ctime>
+#include <chrono>
 
 class Emulator {
 private:
@@ -17,7 +17,7 @@ private:
     std::unique_ptr<CPU> cpu;
     std::unique_ptr<PPU> ppu;
     std::unique_ptr<Joypad> joypad;
-    std::unique_ptr<clock_t>* timer;
+
 
 
 public:
