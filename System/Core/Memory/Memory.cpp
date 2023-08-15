@@ -25,10 +25,8 @@ bool inline inRange(uint16_t address, uint16_t lowerBound, uint16_t upperBound) 
 
 uint8_t Memory::readByte(uint16_t address) const {
     if (inRange(address, 0x0000, 0x7FFF)) {
-        std::cout << "Reading ROM" << std::endl;
         return cartridge->readByte(address);
-    }
-    else if (inRange(address, 0x8000, 0x9FFF)) return vram[address - 0x8000];
+    } else if (inRange(address, 0x8000, 0x9FFF)) return vram[address - 0x8000];
     else if (inRange(address, 0xA000, 0xBFFF)) return externalRam[address - 0xA000];
     else if (inRange(address, 0xC000, 0xCFFF)) return wramBank1[address - 0xC000];
     else if (inRange(address, 0xD000, 0xDFFF)) return wramBank1[address - 0xD000];
@@ -37,12 +35,11 @@ uint8_t Memory::readByte(uint16_t address) const {
     else if (inRange(address, 0xFF00, 0xFF7F)) return io[address - 0xFF00];
     else if (inRange(address, 0xFF80, 0xFFFE)) return hram[address - 0xFF80];
     else if (address == 0xFFFF) return interrupt;
-    else std::cout << "Invalid Address" << std::endl;
+    else{return 0;}
 }
 
 void Memory::writeByte(uint16_t address, uint8_t value) {
     if (inRange(address, 0x0000, 0x7FFF)) {
-        std::cout << "Writing ROM" << std::endl;
         cartridge->writeByte(address, value);
     }
     else if (inRange(address, 0x8000, 0x9FFF)) {
@@ -57,7 +54,8 @@ void Memory::writeByte(uint16_t address, uint8_t value) {
     else if (inRange(address, 0xFF00, 0xFF7F)) io[address - 0xFF00] = value;
     else if (inRange(address, 0xFF80, 0xFFFE)) hram[address - 0xFF80] = value;
     else if (address == 0xFFFF) interrupt = value;
-    else std::cout << "Invalid Address" << std::endl;
+    else
+        std::cout << "Invalid Address" << std::endl;
 }
 
 uint16_t Memory::readWord(uint16_t address) const {
@@ -100,7 +98,8 @@ uint16_t Memory::readWord(uint16_t address) const {
         lowByte = hram[address];
         highByte = hram[(address) + 1];
     } else if (address == 0xFFFF) return interrupt;
-    else std::cout << "Invalid Address" << std::endl;
+    else
+        std::cout << "Invalid Address" << std::endl;
     return static_cast<uint16_t>((highByte << 8) | lowByte);
 }
 
@@ -192,7 +191,6 @@ void Memory::resetMemory() {
 
     interrupt = 0;
     *SP = 0;
-
 }
 
 void Memory::loadROM(std::string path) {
