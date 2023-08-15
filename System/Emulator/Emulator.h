@@ -4,6 +4,8 @@
 #include "../Core/CPU/CPU.h"
 #include "../Core/PPU/PPU.h"
 #include "../Core/Joypad/Joypad.h"
+#include "SDL2/SDL.h"
+#include "SDL2/SDL_events.h"
 
 #include <chrono>
 
@@ -18,7 +20,7 @@ private:
     std::unique_ptr<PPU> ppu;
     std::unique_ptr<Joypad> joypad;
 
-
+    SDL_Window* window{};
 
 public:
     Emulator();

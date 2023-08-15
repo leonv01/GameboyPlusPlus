@@ -8,8 +8,10 @@
 #include <thread>
 
 Emulator::Emulator() {
+    if(SDL_Init(SDL_INIT_VIDEO) != 0)
+        std::cerr << "SDL_Init Error: " << SDL_GetError() << std::endl;
     cpu = std::make_unique<CPU>();
-    ppu = std::make_unique<PPU>();
+    ppu = std::make_unique<PPU>(window);
 
 }
 
@@ -20,7 +22,7 @@ void Emulator::start() {
      * Equation:    1000ms / 60 FPS ~= 16.67 ms
      * Sets the limit for the time per frame
      */
-    int targetFrameDuration = 16;
+    int targetFrameDuration = 1000 / FPS;
     while (true) {
         auto start = std::chrono::high_resolution_clock::now();
         int currentCycle{};
