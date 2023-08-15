@@ -10,6 +10,7 @@ CPU::CPU() {
 CPU::~CPU() = default;
 
 void CPU::initCPU() {
+    isHaltered = false;
     memory->initMemory();       // initializes main memory
     reg->init();                // initializes registers and PC/SP
     interruptMaster = false;    // disables interrupt master
@@ -17,7 +18,8 @@ void CPU::initCPU() {
 }
 
 uint8_t CPU::fetchOpCode() {
-    return memory->readByte(reg->PC++);
+    if(isHaltered) return 0x76;
+    else return memory->readByte(reg->PC++);
 }
 
 void CPU::printStatus() {
@@ -85,7 +87,7 @@ void CPU::requestInterrupt(uint8_t value) {
 void CPU::handleInterrupt() {
     if(interruptMaster){
         uint8_t interrupt = memory->readByte(IF);
-
+        isHaltered = false;
         // VBANK has the highest priority
         if(interrupt & IF_VBLANK){
             interruptServiceRoutine(IF_VBLANK);

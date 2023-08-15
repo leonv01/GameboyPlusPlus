@@ -21,9 +21,12 @@ private:
     const uint16_t IE   = 0xFFFF;   // Interrupt Enable
 
     const int CLOCK_SPEED = 4194304;
+
     bool interruptMaster{};
+    bool isHaltered{};
 
     std::unique_ptr<Register> reg;
+
 
 public:
     /*
