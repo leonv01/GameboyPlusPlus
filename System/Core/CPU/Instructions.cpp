@@ -18,6 +18,7 @@ void CPU::NOP() {
     // lol ඞ
 }
 void CPU::HALT() {
+    isHaltered = true;
     // Halt CPU
     // TODO
     // Logic to halt CPU until interrupt occrus
@@ -28,10 +29,12 @@ void CPU::STOP() {
     // Implement logic to put CPU in standby mode
 }
 void CPU::DI() {
+    interruptMaster = false;
     // Disable Interrupt
     // TODO
 }
 void CPU::EI() {
+    interruptMaster = true;
     // Enable Interrupt
     // TODO
 }
