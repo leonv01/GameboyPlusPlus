@@ -5,6 +5,8 @@
 #include <cstdint>
 #include <string>
 #include "SDL2/SDL.h"
+#include "SDL2/SDL_events.h"
+
 
 class PPU {
 private:
@@ -12,8 +14,9 @@ private:
     const int WIDTH = 144;
 
     SDL_Window* window = nullptr;
+    SDL_Renderer* renderer = nullptr;
 public:
-    PPU();
+    PPU(SDL_Window* window);
     ~PPU();
 
     void updatePPU();
